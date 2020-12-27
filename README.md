@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Toybox is a demo API using [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.  See [toybox-web](http://github.com/abcox/toybox-web) for web client using [vuetify](http://vuetifyjs.com).
 
 ## Installation
 
