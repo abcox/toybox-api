@@ -17,13 +17,20 @@ export class ContactService {
   }
 
   async delete(id: string): Promise<string> {
+    let result: string;
+    /* if (!Types.ObjectId.isValid(id)) {
+      throw new InternalServerErrorException(`Invalid id ${id}`);   // todo: look into validation via middle-ware
+    } */
     try {
-      await this.contactModel.findByIdAndRemove(id).exec();
-      return `Contact deleted where id = ${id}`;
+      let doc = await this.contactModel.findByIdAndRemove(id).exec()
+      if (!doc) {
+        throw new InternalServerErrorException(`Contact not found with id = ${id}`);
+      }
+      result = `Contact deleted for id = ${doc.id}`;
     } catch (err) {
-      debug(err);
-      return `Contact delete failed where id = ${id}`;
+      throw new InternalServerErrorException(err.message);
     }
+    return result;
   }
 
   // todo: provide filtered pagination..
@@ -45,13 +52,12 @@ export class ContactService {
   }
   
   async update(id: string, update: ContactDto): Promise<Contact> {
-    const item = await this.contactModel.findById(id).exec();
-    if (!item?._id) {
-      const msg = `Item not found for id: ${id}`
-      debug(msg);
-      throw new BadRequestException(msg);
+    let item;
+    try {
+      item = await this.contactModel.findByIdAndUpdate(id, update, { returnOriginal: false }).exec();
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
     }
-    await this.contactModel.findByIdAndUpdate(id, update).exec();
-    return await this.contactModel.findById(id).exec();
+    return item;
   }
 }
