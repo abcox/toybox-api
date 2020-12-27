@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class ContactDto {
     @ApiProperty()
@@ -7,7 +7,7 @@ export class ContactDto {
     readonly name: string;
 
     @ApiProperty()
-    @IsInt()
+    @IsString()
     readonly email: string;
 
     @ApiProperty()
