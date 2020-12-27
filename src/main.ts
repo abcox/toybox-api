@@ -6,8 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
   const options = new DocumentBuilder()
-    .setTitle('Toybox 4')
-    .setDescription('This is a demo backend for Toybox4 via Nestjs')
+    .setTitle('Toybox')
+    .setDescription('A demo backend via Nestjs')
     .setVersion('1.0')
     //.addTag('contact')
     .build();
