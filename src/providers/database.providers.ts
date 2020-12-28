@@ -15,6 +15,6 @@ export const databaseProviders = [
         useFindAndModify: false,
         useNewUrlParser: true,
         useUnifiedTopology: true
-      }),      
+      }),
   },
 ];
