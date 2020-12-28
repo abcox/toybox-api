@@ -21,7 +21,12 @@ export class ContactService {
     const createdContact = new this.contactModel(createContactDto);
     try {
       result = {
-        message: `${entityDisplayName} created`,
+        meta: {
+          status: {
+            message: `${entityDisplayName} created`,
+            color: "success"  
+          }
+        },
         item: await new this.contactModel(createContactDto).save()
       };
     } catch (err) {
@@ -40,7 +45,15 @@ export class ContactService {
       if (!doc) {
         throw new InternalServerErrorException(`Contact not found with id = ${id}`);
       }
-      result = { message: `${entityDisplayName} deleted`, id: doc.id };
+      result = { 
+        meta: {
+          status: {
+            message: `${entityDisplayName} deleted`,
+            color: "success"  
+          }
+        },
+        id: doc.id
+      };
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }

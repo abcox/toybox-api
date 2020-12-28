@@ -7,8 +7,17 @@ export interface Contact extends Document {
     readonly phone: string;
 }
 
-export interface BaseResponse {
+export interface BaseResponseMetaStatus {
     readonly message: string;
+    readonly color: string;
+}
+
+export interface BaseResponseMeta {
+    readonly status: BaseResponseMetaStatus;
+}
+
+export interface BaseResponse {
+    readonly meta: BaseResponseMeta;
 }
 
 export interface ContactDeleteResponse extends BaseResponse {    
