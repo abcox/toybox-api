@@ -6,3 +6,15 @@ export interface Contact extends Document {
     readonly email: string;
     readonly phone: string;
 }
+
+export interface BaseResponse {
+    readonly message: string;
+}
+
+export interface ContactDeleteResponse extends BaseResponse {    
+    readonly id: string;
+}
+
+export interface ContactCreateResponse extends BaseResponse {    
+    readonly item: Contact;
+}
