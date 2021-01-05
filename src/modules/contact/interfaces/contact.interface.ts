@@ -1,3 +1,4 @@
+import { BaseResponse } from "../../../common/interfaces/base-response-interfaces";
 import { Document } from 'mongoose';
 
 export interface Contact extends Document {
@@ -7,19 +8,6 @@ export interface Contact extends Document {
     readonly phone: string;
 }
 
-export interface BaseResponseMetaStatus {
-    readonly message: string;
-    readonly color: string;
-}
-
-export interface BaseResponseMeta {
-    readonly status: BaseResponseMetaStatus;
-}
-
-export interface BaseResponse {
-    readonly meta: BaseResponseMeta;
-}
-
 export interface ContactDeleteResponse extends BaseResponse {    
     readonly id: string;
 }
@@ -27,3 +15,7 @@ export interface ContactDeleteResponse extends BaseResponse {
 export interface ContactCreateResponse extends BaseResponse {    
     readonly item: Contact;
 }
+
+/* export interface ContactSort {
+    readonly items: Array<SortMeta>
+} */

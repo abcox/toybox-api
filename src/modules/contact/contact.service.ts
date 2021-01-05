@@ -2,7 +2,7 @@ import { Model, Types } from 'mongoose';
 import { Injectable, Inject, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Contact, ContactCreateResponse, ContactDeleteResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
-import { debug } from 'console';
+import { BaseRequestOptions, SortDirection } from 'src/common/interfaces/base-response-interfaces';
 
 const entityDisplayName = "Contact";
 
@@ -60,9 +60,21 @@ export class ContactService {
     return result;
   }
 
-  // todo: provide filtered pagination..
+  // todo: deprecate (and defer to search..)
   async getAll(): Promise<Contact[]> {
     return this.contactModel.find().exec();
+  }
+
+  // todo: finish this.. (also change client to support server-side paging & sorting..)
+  // todo: provide filtered pagination..
+  // todo: ref: https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
+  // todo: ref: https://stackoverflow.com/questions/59680710/vuetify-server-side-paginated-datatable-does-not-sort-client-side
+  // todo: ref: https://vuetifyjs.com/en/components/data-tables/#server-side-paginate-and-sort
+  async search(filter: Contact, { paging, sorting }: BaseRequestOptions): Promise<Contact[]> {
+    const { limit, start } = paging;
+    const skip = limit * start;
+    const sort = sorting.map((name, direction) => `${direction===SortDirection.Descending ? "-" : ""}${name} `).toString().trimEnd();
+    return this.contactModel.find({filter}).limit(limit).skip(skip).sort(sort).exec();
   }
 
   async getById(id: string): Promise<Contact> {

@@ -1,0 +1,30 @@
+[
+  {
+    "name": "A. Cox",
+    "email": "adam.cox@vorba.com",
+    "phone": "647-389-5555",
+    "id": "5fe81b22aeebddc560830e90"
+  },
+  {
+    "name": "S. Barghgir",
+    "email": "solmaz@email.com",
+    "phone": "416-555-1234",
+    "id": "5fe81b3faeebddc560830e91"
+  },
+  {
+    "name": "Darian",
+    "email": "Darian@cox.xom",
+    "phone": "555-1234",
+    "id": "5fe9600049dc803988cc877b"
+  },
+  {
+    "name": "Joe Smith",
+    "email": "jsmith@hotmail.com",
+    "phone": "555-4444"
+  },
+  {
+    "name": "D. Stevenson",
+    "email": "dsteves@gmail.com",
+    "phone": "555-1234"
+  }
+]

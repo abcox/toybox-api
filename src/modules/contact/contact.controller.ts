@@ -1,18 +1,19 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpStatus,
-    Param,
-    Patch,
-    Post,
-    Response,
-    Query,
-    BadRequestException
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Response,
+  Query,
+  BadRequestException
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
-import { ApiOperation, ApiCreatedResponse, ApiResponse, ApiQuery, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiCreatedResponse, ApiResponse, ApiOkResponse, ApiQuery, ApiNoContentResponse, ApiTags, ApiParam } from '@nestjs/swagger';
 import Contact from './contact';
 import { ContactDto } from './dto/contact.dto';
 
@@ -21,9 +22,12 @@ import { ContactDto } from './dto/contact.dto';
 @ApiTags('contact')
 @Controller('contact')
 export class ContactController {
+  
+  private readonly logger = new Logger(ContactController.name);
+
   constructor(private readonly contactService: ContactService) {}
 
-  @ApiOperation({ summary: 'Get contact list' })
+  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
   @Get('list')
   getContactList(): Promise<Contact[]> {
     return this.contactService.getAll();
@@ -55,6 +59,30 @@ export class ContactController {
   public async createContact(@Response() res, @Body() contact: ContactDto) {
       const result = await this.contactService.create(contact);
       return res.status(HttpStatus.OK).json(result);
+  }  
+  
+  @Post("list")
+  @ApiOperation({ summary: 'Create contacts' })
+  @ApiBody({ type: [ContactDto] })
+  public async importContacts(@Response() res, @Body() contactList: [ContactDto]) {
+    let result = new Array<string>();
+    await Promise.all(contactList.map(async contact => {
+      const newContact = await this.contactService.create(contact);
+      result.push(newContact.item.id);
+    }));
+    return res.status(HttpStatus.OK).json(result);
+  }
+  
+  @Post("delete/list")
+  @ApiOperation({ summary: 'Delete contacts' })
+  @ApiBody({ type: [String] })
+  public async deleteContacts(@Response() res, @Body() contactIdList: [string]) {
+    let result = new Array<string>();
+    for (const id of contactIdList) {
+      const response = await this.contactService.delete(id);
+      result.push(response.id);
+    }
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @ApiOperation({ summary: 'Delete contact' })
