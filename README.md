@@ -1,7 +1,16 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
 
+<h1 align="center">Toybox API / Fullstack Typescript Demo</h1>
+
+<table style="margin-left:auto;margin-right:auto">
+    <tr>
+        <td vlign="center"><a href="https://github.com/jaredhanson/passport/" target="blank"><img src="https://bestofjs.org/logos/passport.svg" width="65" alt="Passport Logo" /></a></td>
+        <td vlign="center"><a href="http://https://www.openapis.org/" target="blank"><img src="https://community.cdn.kony.com/sites/default/files/icon-open-api-swagger.png" width="105" alt="Open API Initiative (OAI) Logo" /></a></td>
+        <td vlign="center"><a href="http://nestjs.com/" target="blank"><img src="https://seeklogo.com/images/N/nestjs-logo-09342F76C0-seeklogo.com.png" width="65" alt="Nest Logo" /></a></td>
+        <td vlign="center"><a href="http://mongodb.com/" target="blank"><img src="https://github.com/mongodb-js/leaf/blob/master/dist/mongodb-leaf_256x256.png?raw=true" width="70" alt="MongoDB Logo" /></a></td>
+    </tr>
+</table>
+
+<!--
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
@@ -18,13 +27,14 @@
   <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
     <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
   <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+</p>-->
 
 ## Description
 
-Toybox is a demo API using [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.  See [toybox-web](http://github.com/abcox/toybox-web) for web client using [vuetify](http://vuetifyjs.com).
+Toybox API uses the [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.  See [toybox-web](http://github.com/abcox/toybox-web) for web client using [vuetify](http://vuetifyjs.com).
+
+## Prerequisites
+- [mongodb](https://docs.mongodb.com/guides/server/install/)
 
 ## Installation
 
