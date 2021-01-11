@@ -1,7 +1,7 @@
 import { BaseResponse } from "../../../common/interfaces/base-response-interfaces";
 import { Document } from 'mongoose';
 
-export interface Contact extends Document {
+export interface IContact extends Document {
     readonly id: string;
     readonly name: string;
     readonly email: string;
@@ -13,9 +13,14 @@ export interface ContactDeleteResponse extends BaseResponse {
 }
 
 export interface ContactCreateResponse extends BaseResponse {    
-    readonly item: Contact;
+    readonly item: IContact;
 }
 
 /* export interface ContactSort {
     readonly items: Array<SortMeta>
 } */
+
+export interface ContactSearchResponse {
+    items: IContact[];
+    itemTotal: number;
+}

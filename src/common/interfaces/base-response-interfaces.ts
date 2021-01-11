@@ -38,7 +38,13 @@ export interface BaseRequestSortingOption {
     direction: SortDirection;
 }
 
-export interface BaseRequestOptions {
+export interface Request<T> {
+    filter: T;
     paging: BaseRequestPagingOptions;
     sorting: BaseRequestSortingOption[];
+}
+
+export interface Response<T> {
+    items: Promise<T>;
+    totalItems: number;
 }

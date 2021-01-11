@@ -1,6 +1,8 @@
 import { Schema } from "mongoose";
+//import { Paginate } from "mongoose-paginate-v2";
 
-export class BaseSchema extends Schema {
+export class BaseSchema extends Schema// implements Paginate
+{
     constructor(sche: any) {
         super(sche);
         this.set('toJSON', {

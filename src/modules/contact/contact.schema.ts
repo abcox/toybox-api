@@ -1,8 +1,26 @@
-//import * as mongoose from 'mongoose';
+import mongoose from "mongoose";
 import { BaseSchema } from '../../helpers/base-schema';
 
 export const ContactSchema = new BaseSchema({
-  name: String,
-  email: String,
-  phone: String,
+  name: {
+    type: String,
+    required: "Name is required"
+  },
+  email: {
+    type: String,
+    required: "Email is required"
+  },
+  phone: {
+    type: String,
+    required: "Phone is required"
+  },
+  createdOn: {
+    type: Date,
+    required: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User'
+  }
 });

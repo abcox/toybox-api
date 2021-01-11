@@ -13,8 +13,18 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
-import { ApiBody, ApiOperation, ApiCreatedResponse, ApiResponse, ApiOkResponse, ApiQuery, ApiNoContentResponse, ApiTags, ApiParam } from '@nestjs/swagger';
-import Contact from './contact';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiTags
+} from '@nestjs/swagger';
+import { IContact, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
 
 // todo: look into validation: https://github.com/typestack/class-validator#custom-validation-classes
@@ -29,8 +39,18 @@ export class ContactController {
 
   @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
   @Get('list')
-  getContactList(): Promise<Contact[]> {
+  getContactList(): Promise<IContact[]> {
     return this.contactService.getAll();
+  }
+
+  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  @Get('search')
+  searchContacts(@Param('options') options: any): Promise<ContactSearchResponse> {
+    let results = this.contactService.search(options);
+    return <ContactSearchResponse> {
+      items = results,
+      itemTotal = 0,
+    }
   }
 
   @ApiOperation({ summary: 'Get contact' })
@@ -40,7 +60,7 @@ export class ContactController {
       //type: Contact // todo: resolve
     })
   @Get(':id')
-  getContact(@Param('id') id: string): Promise<Contact> {
+  getContact(@Param('id') id: string): Promise<IContact> {
     const item = this.contactService.getById(id);
     if (!item) {
         throw new BadRequestException(`Contact not found for id = ${id}`);
