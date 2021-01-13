@@ -2,6 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import { BaseSchema } from '../../helpers/base-schema';
 import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 
+// https://github.com/DefinitelyTyped/DefinitelyTyped/issues/33824#issuecomment-753469856
+
 export const ContactSchema = new BaseSchema({
   name: String,
   email: String,
