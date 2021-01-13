@@ -13,4 +13,4 @@ export class BaseSchema extends Schema// implements Paginate
             }
         });
     }
-}
+};

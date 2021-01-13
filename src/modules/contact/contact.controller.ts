@@ -10,7 +10,8 @@ import {
   Post,
   Response,
   Query,
-  BadRequestException
+  BadRequestException,
+  UseInterceptors
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import {
@@ -26,6 +27,9 @@ import {
 } from '@nestjs/swagger';
 import { IContact, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
+import { AggregatePaginateResult } from 'mongoose';
+import { Request } from "src/common/interfaces/base-response-interfaces";
+import { LinkHeaderInterceptor, MongoPaginationParamDecorator, MongoPagination, Pageable } from '@algoan/nestjs-pagination';
 
 // todo: look into validation: https://github.com/typestack/class-validator#custom-validation-classes
 
@@ -43,14 +47,21 @@ export class ContactController {
     return this.contactService.getAll();
   }
 
+  // https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/
+  // https://github.com/nestjsx/nestjs-typeorm-paginate
+  // https://whatthecode.dev/nestjs-typeorm-pagination-step-by-step-guide/
+  // https://medium.com/@chnirt/how-do-i-practice-with-nestjs-nestjs-typeorm-mongodb-9e407818a296 MongoRepository
+  // https://eliezer.medium.com/typeorm-mongodb-review-8855903228b1
+  // https://github.com/algoan/nestjs-components/tree/master/packages/pagination
+  // https://slingshotlabs.io/blog/cursor-pagination-graphql-mongodb/
+
+  @UseInterceptors(new LinkHeaderInterceptor({ resource: 'data' }))
   @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
   @Get('search')
-  searchContacts(@Param('options') options: any): Promise<ContactSearchResponse> {
-    let results = this.contactService.search(options);
-    return <ContactSearchResponse> {
-      items = results,
-      itemTotal = 0,
-    }
+  //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
+  searchContacts(@MongoPaginationParamDecorator() pagination: MongoPagination): Promise<AggregatePaginateResult<IContact>> {
+      return this.contactService.search(pagination);
   }
 
   @ApiOperation({ summary: 'Get contact' })
@@ -77,8 +88,9 @@ export class ContactController {
     })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   public async createContact(@Response() res, @Body() contact: ContactDto) {
-      const result = await this.contactService.create(contact);
-      return res.status(HttpStatus.OK).json(result);
+    Logger.log("creating contact: ", JSON.stringify(contact));    
+    const result = await this.contactService.create(contact);
+    return res.status(HttpStatus.OK).json(result);
   }  
   
   @Post("list")

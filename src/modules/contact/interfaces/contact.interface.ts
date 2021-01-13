@@ -1,5 +1,6 @@
 import { BaseResponse } from "../../../common/interfaces/base-response-interfaces";
 import { Document } from 'mongoose';
+import { ApiProperty } from "@nestjs/swagger";
 
 export interface IContact extends Document {
     readonly id: string;

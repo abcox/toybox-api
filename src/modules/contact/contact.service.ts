@@ -1,8 +1,14 @@
-import { Model, Types } from 'mongoose';
+import { AggregatePaginateModel, AggregatePaginateResult, Connection, Model, Types } from 'mongoose';
 import { Injectable, Inject, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { IContact, ContactCreateResponse, ContactDeleteResponse, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
 import { Response, Request, SortDirection } from 'src/common/interfaces/base-response-interfaces';
+import { ApiResponse } from '@nestjs/swagger';
+import { MongoPagination } from '@algoan/nestjs-pagination';
+//import { ContactPagedModel } from './contact.provider';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Doc } from 'prettier';
+import { ContactSchema2 } from './contact.schema';
 
 const entityDisplayName = "Contact";
 const defaults = {
@@ -12,11 +18,17 @@ const defaults = {
   }
 };
 
+//type SampleModel<T extends Document> = PaginateModel<T>;
+type ContactPagedModel<T extends Document> = AggregatePaginateModel<IContact>;
+
 @Injectable()
 export class ContactService {
-  constructor(
+  constructor(    
+    //@InjectConnection('DATABASE_CONNECTION') private connection: Connection,
     @Inject('CONTACT_MODEL')
     private contactModel: Model<IContact>,
+    /* @Inject('CONTACT_PAGED_MODEL')
+    private contactPagedModel: ContactPagedModel<Document & IContact>, */
   ) {}
 
   async create(createContactDto: ContactDto): Promise<ContactCreateResponse> {
@@ -82,17 +94,23 @@ export class ContactService {
   // https://medium.com/@agentwhs/complete-guide-for-typescript-for-mongoose-for-node-js-8cc0a7e470c1
   // https://github.com/MosesEsan/mesan-nodejs-crud-api-with-pagination-filtering-grouping-and-sorting-capabilities/blob/master/src/controllers/event.js
   // https://medium.com/swlh/node-js-api-add-crud-operations-with-pagination-filtering-grouping-and-sorting-capabilities-55375ad0b774
-  async search(optionsIn: Request<IContact>): Promise<Response<IContact[]>> {
-    const { filter, paging, sorting } = optionsIn;
-    const { limit, start } = paging;
-    const skip = limit * start;
-    const sort = sorting.map((name, direction) => `${direction===SortDirection.Descending ? "-" : ""}${name} `).toString().trimEnd();
 
-    let aggregate_options = [];
+  // https://stackoverflow.com/questions/48305624/how-to-use-mongodb-aggregation-for-pagination (facets)
+  // https://doug-martin.github.io/nestjs-query/
+
+  async search(optionsIn: MongoPagination): Promise<AggregatePaginateResult<IContact>> {
+    
+    //const contactPagedModel2: ContactPagedModel<IContact & Document> = this.connection.model<IContact>('Contact', ContactSchema2) as ContactPagedModel<IContact & Document>;
+    //const contactPagedModel2: any = this.connection.model('Contact', ContactSchema2);
+
+    const { filter, limit, skip, sort } = optionsIn;
+    //const { limit, start } = paging;
+    //const skip = limit * start;
+    //const sort = sorting.map((name, direction) => `${direction===SortDirection.Descending ? "-" : ""}${name} `).toString().trimEnd();
 
     //PAGINATION -- set the options for pagination
     const options = {
-      page: start || defaults.paging.start,
+      page: skip || defaults.paging.start,
       collation: { locale: "en" },
       customLabels: {
         totalDocs: "totalItems",
@@ -100,11 +118,13 @@ export class ContactService {
       }
     };
 
+    let aggregateOptions = [];
+    
     //2
     //LOOKUP/JOIN -- SECOND STAGE
     //FIRST JOIN  -- Category ===================================
     // Here we use $lookup(aggregation) to get the relationship from event to categories (one to many).
-    aggregate_options.push({
+    aggregateOptions.push({
       $lookup: {
         from: "contacts",
         localField: "name",
@@ -113,22 +133,22 @@ export class ContactService {
       }
     });
     //deconstruct the $contacts array using $unwind(aggregation).
-    aggregate_options.push({$unwind: {path: "$contacts", preserveNullAndEmptyArrays: true}});
+    aggregateOptions.push({$unwind: {path: "$contacts", preserveNullAndEmptyArrays: true}});
 
     //4
     //FILTER BY DATE -- FOURTH STAGE
-    aggregate_options.push({
+    aggregateOptions.push({
         $match: {"start_date": {$gte: new Date()}}
     });
 
     //5
     //SORTING -- FIFTH STAGE - SORT BY DATE
-    aggregate_options.push({
+    aggregateOptions.push({
         $sort: {"start_date": -1, "_id": -1}
     });
 
     //SELECT FIELDS
-    aggregate_options.push({
+    aggregateOptions.push({
         $project: {
             _id: 1,
             createdBy: 1,
@@ -143,7 +163,7 @@ export class ContactService {
         }
     });
 
-    aggregate_options.push({
+    aggregateOptions.push({
         $sample: { size: skip || defaults.paging.start }
     });
 
@@ -155,13 +175,16 @@ export class ContactService {
       .exec();
     let results = this.contactModel.paginate({}, options, function(err, result){
     }); */
-
     
-    // Set up the aggregation
-    const myAggregate = this.contactModel.aggregate(aggregate_options);
-    const result = await this.contactModel.aggregatePaginate(myAggregate, options);
-
-    return result.events;
+    /* return await this.contactPagedModel.aggregatePaginate(
+      this.contactPagedModel2.aggregate(aggregateOptions),
+      options
+      ); */
+    /* return await contactPagedModel2.aggregatePaginate(
+      contactPagedModel2.aggregate(aggregateOptions),
+      options
+      ); */
+    return undefined;
   }
 
   async getById(id: string): Promise<IContact> {
@@ -180,7 +203,7 @@ export class ContactService {
   async update(id: string, update: ContactDto): Promise<IContact> {
     let item;
     try {
-      item = await this.contactModel.findByIdAndUpdate(id, update, { returnOriginal: false }).exec();
+      item = await this.contactModel.findByIdAndUpdate(id, update, { new: true }).exec();
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
