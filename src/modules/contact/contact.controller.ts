@@ -11,7 +11,8 @@ import {
   Response,
   Query,
   BadRequestException,
-  UseInterceptors
+  UseInterceptors,
+  Request
 } from '@nestjs/common';
 import { ContactService } from './contact.service';
 import {
@@ -28,8 +29,10 @@ import {
 import { IContact, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
 import { AggregatePaginateResult } from 'mongoose';
-import { Request } from "src/common/interfaces/base-response-interfaces";
 import { LinkHeaderInterceptor, MongoPaginationParamDecorator, MongoPagination, Pageable } from '@algoan/nestjs-pagination';
+import { inspect } from 'util'
+
+const fs = require("fs");
 
 // todo: look into validation: https://github.com/typestack/class-validator#custom-validation-classes
 
@@ -41,10 +44,14 @@ export class ContactController {
 
   constructor(private readonly contactService: ContactService) {}
 
-  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
   @Get('list')
-  getContactList(): Promise<IContact[]> {
-    return this.contactService.getAll();
+  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  //@ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
+  getContactList(@Request() request: Request): Promise<IContact[]> {
+    Logger.log(`list request: ${inspect(request.url)}`);
+    const items = this.contactService.getAll();
+    Logger.log(`list items: ${inspect(items)}`);
+    return items;
   }
 
   // https://www.moesif.com/blog/technical/api-design/REST-API-Design-Filtering-Sorting-and-Pagination/
@@ -55,13 +62,39 @@ export class ContactController {
   // https://github.com/algoan/nestjs-components/tree/master/packages/pagination
   // https://slingshotlabs.io/blog/cursor-pagination-graphql-mongodb/
 
-  @UseInterceptors(new LinkHeaderInterceptor({ resource: 'data' }))
+  //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
   @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
   @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
   @Get('search')
   //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
-  searchContacts(@MongoPaginationParamDecorator() pagination: MongoPagination): Promise<AggregatePaginateResult<IContact>> {
-      return this.contactService.search(pagination);
+  async searchContacts(
+    @Request() request: Request,
+    @Query() query,
+    //@MongoPaginationParamDecorator() pagination: MongoPagination
+    ): Promise<{items: IContact[], totalItems: number}> {// Promise<AggregatePaginateResult<IContact>>
+      //Logger.log(`search request: ${inspect(request)}`);
+           
+      /* const dir = await fs.promises.opendir("../logs");
+      for await (const dirent of dir) {
+        console.log(dirent.name);
+      }
+      fs.writeFile('../logs/api-log2.txt', inspect(request), 'ascii', (err) => { 
+        if (err) throw err;
+        console.log('The file has been saved!');
+      }); */
+
+      Logger.log(`search request url: ${inspect(request.url)}`);
+      Logger.log(`search request query: ${inspect(query)}`);
+      //Logger.log(`search pagination: ${inspect(pagination)}`);
+      const data = await this.contactService.getAll2(query);
+      //const data = this.contactService.getAll();
+      //return this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
+      const count = await this.contactService.count();
+      Logger.log(`search pagination count: ${count}`);
+      const resp = { totalItems: count, items: data };
+      //Logger.log(`search pagination: ${inspect(data)}`);
+      //Logger.log(`search resp: ${inspect(resp)}`);
+      return resp;
   }
 
   @ApiOperation({ summary: 'Get contact' })

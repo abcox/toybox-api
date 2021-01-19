@@ -1,5 +1,5 @@
 import { AggregatePaginateModel, AggregatePaginateResult, Connection, Model, Types } from 'mongoose';
-import { Injectable, Inject, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { IContact, ContactCreateResponse, ContactDeleteResponse, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
 import { Response, Request, SortDirection } from 'src/common/interfaces/base-response-interfaces';
@@ -9,6 +9,7 @@ import { MongoPagination } from '@algoan/nestjs-pagination';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Doc } from 'prettier';
 import { ContactSchema2 } from './contact.schema';
+import { inspect } from 'util';
 
 const entityDisplayName = "Contact";
 const defaults = {
@@ -82,6 +83,35 @@ export class ContactService {
   async getAll(): Promise<IContact[]> {
     return this.contactModel.find().exec();
   }
+
+  // todo: deprecate (and defer to search..)
+  async getAll2({ search, options }): Promise<IContact[]> {
+    /* const resultsPerPage = 5;
+    const page = req.params.page >= 1 ? req.params.page : 1;
+    const query = req.query.search; */
+    
+    Logger.log(`options: ${options}`);
+  
+    let { itemsPerPage, page } = JSON.parse(options);
+    Logger.log(`itemsPerPage: ${itemsPerPage}`);
+    Logger.log(`page: ${page}`);
+    itemsPerPage = itemsPerPage > 5 ? itemsPerPage : 5;
+
+    Logger.log(`itemsPerPage: ${itemsPerPage}`);
+
+    let items = this.contactModel
+      .find()
+      //.find({ name: query })
+      //.select("name")
+      //.sort({ name: "asc" })
+      .limit(itemsPerPage)
+      .skip(itemsPerPage * --page)
+      .exec();
+      
+    return items;
+  }
+
+  count = async () => await this.contactModel.countDocuments();
 
   // todo: finish this.. (also change client to support server-side paging & sorting..)
   // todo: provide filtered pagination..
