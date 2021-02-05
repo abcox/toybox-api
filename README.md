@@ -55,6 +55,17 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## API Client Generation
+Delete folder 'api/cient' and all contents
+Generate the api/client
+```
+npm run gencli
+```
+Add file .eslintignore, and add:
+```
+/*.*
+```
+
 ## Test
 
 ```bash
@@ -79,3 +90,9 @@ None
 ## License
 
 None
+
+## Support
+1. Issue during build of API results in no changes: [SO](nestjs SwaggerDocumentOptions github)
+    ```
+    npm run prebuild
+    ```

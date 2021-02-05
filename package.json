@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "gencli": "openapi-generator-cli generate -i http://localhost:3000/api-json --generator-name typescript-axios -o client/typescript-axios --config api-client-config.json && cd client/typescript-axios && npm install && npm run build && cd ../../../web && npm install ../api/client/typescript-axios",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

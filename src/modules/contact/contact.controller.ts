@@ -98,11 +98,11 @@ export class ContactController {
   }
 
   @ApiOperation({ summary: 'Get contact' })
-  @ApiResponse({
+/*   @ApiResponse({
       description: 'Contact',
       status: 201,
       //type: Contact // todo: resolve
-    })
+    }) */
   @Get(':id')
   getContact(@Param('id') id: string): Promise<IContact> {
     const item = this.contactService.getById(id);
@@ -119,7 +119,7 @@ export class ContactController {
       status: 201,
       //type: Contact // todo: resolve
     })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  /* @ApiResponse({ status: 403, description: 'Forbidden.' }) */
   public async createContact(@Response() res, @Body() contact: ContactDto) {
     Logger.log("creating contact: ", JSON.stringify(contact));    
     const result = await this.contactService.create(contact);
@@ -151,7 +151,7 @@ export class ContactController {
   }
 
   @ApiOperation({ summary: 'Delete contact' })
-  @ApiResponse({ description: 'Contact deleted' })
+  /* @ApiResponse({ description: 'Contact deleted' }) */
   //@ApiQuery({ name: 'id', type: 'string' })
   @Delete(':id')
   public async deleteContact(@Param('id') id: string, @Response() res) {
@@ -159,9 +159,9 @@ export class ContactController {
       return res.status(HttpStatus.OK).json(result);
   }
   
-  @ApiOperation({ summary: 'Update contact' })
+  @ApiOperation({ operationId: "updateContact", summary: 'Update contact' })
   @Patch(':id')
-  public async updateTodo(@Param('id') id: string, @Response() res, @Body() contact: ContactDto) {
+  public async updateContact2(@Param('id') id: string, @Response() res, @Body() contact: ContactDto) {
       const result = await this.contactService.update(id, contact);
       return res.status(HttpStatus.OK).json(result);
   }
