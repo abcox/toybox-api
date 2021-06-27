@@ -1,3 +1,5 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export interface BaseResponseMetaStatus {
     readonly message: string;
     readonly color: string;
@@ -38,7 +40,16 @@ export interface BaseRequestSortingOption {
     direction: SortDirection;
 }
 
-export interface BaseRequestOptions {
+export class Request<T> {
+    @ApiProperty()
+    filter: T;
+    @ApiProperty()
     paging: BaseRequestPagingOptions;
+    @ApiProperty()
     sorting: BaseRequestSortingOption[];
+}
+
+export interface Response<T> {
+    items: Promise<T>;
+    totalItems: number;
 }
