@@ -45,6 +45,9 @@ $ npm install
 ## Running the app
 
 ```bash
+# start data services (mongodb)
+$ "C:\Program Files\MongoDB\Server\4.4\bin\mongod.exe" --dbpath "C:\Program Files\MongoDB\Server\4.4\data"
+
 # development
 $ npm run start
 
