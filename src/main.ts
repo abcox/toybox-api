@@ -11,7 +11,7 @@ async function bootstrap() {
     .setTitle('Toybox')
     .setDescription('A demo backend via Nestjs')
     .setVersion('1.0')
-    //.addTag('contact')
+    .addTag('contact')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);

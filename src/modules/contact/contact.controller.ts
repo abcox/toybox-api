@@ -45,7 +45,7 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Get('list')
-  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  @ApiOperation({ operationId: "getContacts", summary: 'Get contact list' }) // todo: Search contacts
   //@ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
   getContactList(@Request() request: Request): Promise<IContact[]> {
     Logger.log(`list request: ${inspect(request.url)}`);
@@ -97,12 +97,12 @@ export class ContactController {
       return resp;
   }
 
-  @ApiOperation({ summary: 'Get contact' })
-  @ApiResponse({
+  @ApiOperation({ operationId: "getContact", summary: 'Get contact' })
+/*   @ApiResponse({
       description: 'Contact',
       status: 201,
       //type: Contact // todo: resolve
-    })
+    }) */
   @Get(':id')
   getContact(@Param('id') id: string): Promise<IContact> {
     const item = this.contactService.getById(id);
@@ -113,13 +113,13 @@ export class ContactController {
   }
   
   @Post()
-  @ApiOperation({ summary: 'Create contact' })
+  @ApiOperation({operationId: "createContact",  summary: 'Create contact' })
   @ApiCreatedResponse({
       description: 'Contact created',
       status: 201,
       //type: Contact // todo: resolve
     })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  /* @ApiResponse({ status: 403, description: 'Forbidden.' }) */
   public async createContact(@Response() res, @Body() contact: ContactDto) {
     Logger.log("creating contact: ", JSON.stringify(contact));    
     const result = await this.contactService.create(contact);
@@ -150,8 +150,8 @@ export class ContactController {
     return res.status(HttpStatus.OK).json(result);
   }
 
-  @ApiOperation({ summary: 'Delete contact' })
-  @ApiResponse({ description: 'Contact deleted' })
+  @ApiOperation({ operationId: "deleteContact", summary: 'Delete contact' })
+  /* @ApiResponse({ description: 'Contact deleted' }) */
   //@ApiQuery({ name: 'id', type: 'string' })
   @Delete(':id')
   public async deleteContact(@Param('id') id: string, @Response() res) {
@@ -159,9 +159,9 @@ export class ContactController {
       return res.status(HttpStatus.OK).json(result);
   }
   
-  @ApiOperation({ summary: 'Update contact' })
+  @ApiOperation({ operationId: "updateContact", summary: 'Update contact' })
   @Patch(':id')
-  public async updateTodo(@Param('id') id: string, @Response() res, @Body() contact: ContactDto) {
+  public async updateContact2(@Param('id') id: string, @Response() res, @Body() contact: ContactDto) {
       const result = await this.contactService.update(id, contact);
       return res.status(HttpStatus.OK).json(result);
   }
