@@ -1,20 +1,20 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export interface BaseResponseMetaStatus {
+export interface IBaseResponseMetaStatus {
     readonly message: string;
     readonly color: string;
 }
 
-export interface BaseResponseMeta {
-    readonly status: BaseResponseMetaStatus;
+export interface IBaseResponseMeta {
+    readonly status: IBaseResponseMetaStatus;
 }
 
-export interface BaseResponseError {
-    readonly status: BaseResponseMetaStatus;
+export interface IBaseResponseError {
+    readonly status: IBaseResponseMetaStatus;
 }
 
-export interface BaseResponse {
-    readonly meta: BaseResponseMeta;
+export interface IBaseResponse {
+    readonly meta: IBaseResponseMeta;
 }
 
 /* export interface SortMeta {
@@ -25,7 +25,7 @@ export interface BaseResponse {
 
 // REQUEST
 
-export interface BaseRequestPagingOptions {
+export interface IBaseRequestPagingOptions {
     start: number;
     limit: number;
 }
@@ -35,7 +35,7 @@ export enum SortDirection {
     Descending = -1
 }
 
-export interface BaseRequestSortingOption {
+export interface IBaseRequestSortingOption {
     name: string;
     direction: SortDirection;
 }
@@ -44,12 +44,16 @@ export class Request<T> {
     @ApiProperty()
     filter: T;
     @ApiProperty()
-    paging: BaseRequestPagingOptions;
+    paging: IBaseRequestPagingOptions;
     @ApiProperty()
-    sorting: BaseRequestSortingOption[];
+    sorting: IBaseRequestSortingOption[];
 }
 
 export interface Response<T> {
     items: Promise<T>;
     totalItems: number;
+    // todo: explore this idea..
+    /* meta: {
+        request: Request<T>
+    }; */
 }

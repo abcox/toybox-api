@@ -45,7 +45,7 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Get('list')
-  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  @ApiOperation({ operationId: "getContacts", summary: 'Get contact list' }) // todo: Search contacts
   //@ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
   getContactList(@Request() request: Request): Promise<IContact[]> {
     Logger.log(`list request: ${inspect(request.url)}`);
@@ -97,7 +97,7 @@ export class ContactController {
       return resp;
   }
 
-  @ApiOperation({ summary: 'Get contact' })
+  @ApiOperation({ operationId: "getContact", summary: 'Get contact' })
 /*   @ApiResponse({
       description: 'Contact',
       status: 201,
@@ -113,7 +113,7 @@ export class ContactController {
   }
   
   @Post()
-  @ApiOperation({ summary: 'Create contact' })
+  @ApiOperation({operationId: "createContact",  summary: 'Create contact' })
   @ApiCreatedResponse({
       description: 'Contact created',
       status: 201,
@@ -150,7 +150,7 @@ export class ContactController {
     return res.status(HttpStatus.OK).json(result);
   }
 
-  @ApiOperation({ summary: 'Delete contact' })
+  @ApiOperation({ operationId: "deleteContact", summary: 'Delete contact' })
   /* @ApiResponse({ description: 'Contact deleted' }) */
   //@ApiQuery({ name: 'id', type: 'string' })
   @Delete(':id')
