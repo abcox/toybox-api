@@ -1,0 +1,8 @@
+{
+    "npmName": "toybox-backend",
+    "npmVersion": "2.0.0",
+    "snapshot": false,
+    "supportsES6": false,
+    "modelPropertyNaming": "original",
+    "projectVersion": "1.0.0"
+}
