@@ -35,18 +35,55 @@ Toybox API uses the [Nest](https://github.com/nestjs/nest) framework TypeScript 
 
 ## Prerequisites
 - [mongodb](https://docs.mongodb.com/guides/server/install/)
-
+- [Nest/NestJS](https://docs.nestjs.com/)
+  - [OpenAPI for NestJS (swagger)](https://docs.nestjs.com/openapi/introduction)
+- [openapi-generator-cli](https://www.npmjs.com/package/@openapitools/openapi-generator-cli)
+  ```bash
+  npm install @openapitools/openapi-generator-cli
+  ```
 ## Installation
 
 ```bash
 $ npm install
 ```
 
+## Deploy API client for local development
+
+1. Run commands:
+
+    ```bash
+      # Review client openapitools configuration
+      > toybox-api\openapi-config.json
+      > toybox-api\package.json > scripts/gen-cli
+
+      # Generate client
+      > cd toybox-api
+      > npm run gen-cli
+
+      # Build client
+      > cd ..\toybox-backend
+      > npm install
+      > npm run build
+
+      # Install
+      > cd ..\toybox-web
+      > npm install ..\toybox-backend --save
+
+    ```
+
+2. Review package.json for client reference
+
+    ```bash
+
+      "toybox-backend": "file:../toybox-backend"
+
+    ```
+
 ## Running the app
 
 ```bash
 # start data services (mongodb)
-$ "C:\Program Files\MongoDB\Server\4.4\bin\mongod.exe" --dbpath "C:\Program Files\MongoDB\Server\4.4\data"
+$ "C:\Program Files\MongoDB\Server\4.4\bin\mongod.exe" --dbpath "C:\data\toybox"
 
 # development
 $ npm run start
@@ -70,6 +107,9 @@ Add file .eslintignore, and add:
 ```
 
 ## Test
+
+- http://localhost:3000/api/
+- swagger.json https://docs.nestjs.com/api-json
 
 ```bash
 # unit tests

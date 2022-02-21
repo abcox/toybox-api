@@ -1,0 +1,236 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Toybox",
+        "description": "A demo backend via Nestjs",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "schemas": {
+            "ContactDto": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "name",
+                    "email",
+                    "phone"
+                ]
+            }
+        }
+    },
+    "paths": {
+        "/contact/list": {
+            "get": {
+                "operationId": "getContactList",
+                "summary": "Get contact list",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            },
+            "post": {
+                "operationId": "importContacts",
+                "summary": "Create contacts",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ContactDto"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            }
+        },
+        "/contact/search": {
+            "get": {
+                "operationId": "searchContacts",
+                "summary": "Search contact list",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "required": false,
+                        "in": "query",
+                        "explode": false,
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search contact list succeeded"
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            }
+        },
+        "/contact/{id}": {
+            "get": {
+                "operationId": "getContact",
+                "summary": "Get contact",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Contact"
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            },
+            "delete": {
+                "operationId": "deleteContact",
+                "summary": "Delete contact",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contact deleted"
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            },
+            "patch": {
+                "operationId": "updateContact",
+                "summary": "Update contact",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ContactDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            }
+        },
+        "/contact": {
+            "post": {
+                "operationId": "createContact",
+                "summary": "Create contact",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ContactDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Contact created"
+                    },
+                    "403": {
+                        "description": "Forbidden."
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            }
+        },
+        "/contact/delete/list": {
+            "post": {
+                "operationId": "deleteContacts",
+                "summary": "Delete contacts",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "tags": [
+                    "contact"
+                ]
+            }
+        }
+    }
+}

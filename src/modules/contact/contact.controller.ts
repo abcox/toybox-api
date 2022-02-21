@@ -63,7 +63,8 @@ export class ContactController {
   // https://slingshotlabs.io/blog/cursor-pagination-graphql-mongodb/
 
   //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
-  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  @ApiOperation({ summary: 'Search contact list' }) // todo: Search contacts
+  //@ApiResponse({ status: 200, description: 'Search contact list succeeded' })
   @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
   @Get('search')
   //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
@@ -97,12 +98,12 @@ export class ContactController {
       return resp;
   }
 
-  @ApiOperation({ operationId: "getContact", summary: 'Get contact' })
-/*   @ApiResponse({
-      description: 'Contact',
-      status: 201,
-      //type: Contact // todo: resolve
-    }) */
+  @ApiOperation({ summary: 'Get contact' })
+  @ApiResponse({
+    description: 'Contact',
+    status: 201,
+    //type: Contact // todo: resolve
+  })
   @Get(':id')
   getContact(@Param('id') id: string): Promise<IContact> {
     const item = this.contactService.getById(id);
@@ -115,11 +116,11 @@ export class ContactController {
   @Post()
   @ApiOperation({operationId: "createContact",  summary: 'Create contact' })
   @ApiCreatedResponse({
-      description: 'Contact created',
-      status: 201,
-      //type: Contact // todo: resolve
-    })
-  /* @ApiResponse({ status: 403, description: 'Forbidden.' }) */
+    description: 'Contact created',
+    status: 201,
+    //type: Contact // todo: resolve
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
   public async createContact(@Response() res, @Body() contact: ContactDto) {
     Logger.log("creating contact: ", JSON.stringify(contact));    
     const result = await this.contactService.create(contact);
@@ -150,8 +151,11 @@ export class ContactController {
     return res.status(HttpStatus.OK).json(result);
   }
 
-  @ApiOperation({ operationId: "deleteContact", summary: 'Delete contact' })
-  /* @ApiResponse({ description: 'Contact deleted' }) */
+  @ApiOperation({ summary: 'Delete contact' })
+  @ApiResponse({
+    description: 'Contact deleted',
+    status: 200
+  })
   //@ApiQuery({ name: 'id', type: 'string' })
   @Delete(':id')
   public async deleteContact(@Param('id') id: string, @Response() res) {
@@ -161,7 +165,11 @@ export class ContactController {
   
   @ApiOperation({ operationId: "updateContact", summary: 'Update contact' })
   @Patch(':id')
-  public async updateContact2(@Param('id') id: string, @Response() res, @Body() contact: ContactDto) {
+  public async updateContact(
+    @Param('id') id: string,
+    @Response() res,
+    @Body() contact: ContactDto
+    ) {
       const result = await this.contactService.update(id, contact);
       return res.status(HttpStatus.OK).json(result);
   }
