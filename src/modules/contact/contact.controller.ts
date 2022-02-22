@@ -65,14 +65,20 @@ export class ContactController {
   //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
   @ApiOperation({ summary: 'Search contact list' }) // todo: Search contacts
   //@ApiResponse({ status: 200, description: 'Search contact list succeeded' })
+  @ApiQuery({name: 'page', required: false, explode: false, type: Number, isArray: false})
   @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
+  @ApiQuery({name: 'searchString', required: false, explode: false, type: String, isArray: false})
+  //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
   @Get('search')
   //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
   async searchContacts(
     @Request() request: Request,
     @Query() query,
-    //@MongoPaginationParamDecorator() pagination: MongoPagination
-    ): Promise<{items: IContact[], totalItems: number}> {// Promise<AggregatePaginateResult<IContact>>
+    @MongoPaginationParamDecorator({ perPageName:"limit" }) pagination: MongoPagination
+    ): //Promise<{items: IContact[], totalItems: number}>
+      //Promise<{ items: AggregatePaginateResult<IContact>, totalItems: number}>
+      Promise<AggregatePaginateResult<IContact>>
+    {
       //Logger.log(`search request: ${inspect(request)}`);
            
       /* const dir = await fs.promises.opendir("../logs");
@@ -83,16 +89,18 @@ export class ContactController {
         if (err) throw err;
         console.log('The file has been saved!');
       }); */
-
+      
       Logger.log(`search request url: ${inspect(request.url)}`);
       Logger.log(`search request query: ${inspect(query)}`);
+      Logger.log(`search request pagination: ${inspect(pagination)}`);
       //Logger.log(`search pagination: ${inspect(pagination)}`);
-      const data = await this.contactService.getAll2(query);
+      //const data = await this.contactService.getAll2(query);
       //const data = this.contactService.getAll();
-      //return this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
+      pagination.filter = query.searchString;
+      const resp = await this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
       const count = await this.contactService.count();
       Logger.log(`search pagination count: ${count}`);
-      const resp = { totalItems: count, items: data };
+      //const resp = { totalItems: count, items: data };
       //Logger.log(`search pagination: ${inspect(data)}`);
       //Logger.log(`search resp: ${inspect(resp)}`);
       return resp;
