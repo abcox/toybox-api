@@ -1,4 +1,4 @@
-import { AggregatePaginateModel, AggregatePaginateResult, Connection, Model, Types } from 'mongoose';
+import { AggregatePaginateModel, AggregatePaginateResult, Connection, Model, Types, Mongoose } from 'mongoose';
 import { Injectable, Inject, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { IContact, ContactCreateResponse, ContactDeleteResponse, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
@@ -130,6 +130,8 @@ export class ContactService {
 
   async search(optionsIn: MongoPagination): Promise<AggregatePaginateResult<IContact>> {
     
+    Logger.log('optionsIn: ', JSON.stringify(optionsIn));
+    
     //const contactPagedModel2: ContactPagedModel<IContact & Document> = this.connection.model<IContact>('Contact', ContactSchema2) as ContactPagedModel<IContact & Document>;
     //const contactPagedModel2: any = this.connection.model('Contact', ContactSchema2);
 
@@ -214,7 +216,142 @@ export class ContactService {
       contactPagedModel2.aggregate(aggregateOptions),
       options
       ); */
-    return undefined;
+
+
+    // Review:
+    // https://mongoplayground.net/
+    // https://dev.to/max_vynohradov/the-right-way-to-make-advanced-and-efficient-mongodb-pagination-16oa
+    // https://stackoverflow.com/questions/59975487/how-do-i-filter-by-a-subdocument-substring-using-indexofcp
+
+    const filter2 = { input: "$name", as: "name", cond: { $eq: [ "Adam" ] } };
+
+    const pipeline2 = ([
+      //{ '$match' : { "_id" : new Types.ObjectId("6003b1b61af92c53c410936f") } },
+      //{ '$match' : { ...filter2, active: true } },
+      { '$match': { 'name': { $regex: filter || '', $options: "i" } } },
+      { '$facet': {
+          //metadata: [{ $count: "total" }, { $addFields: { page: NumberInt(3) } }],
+          data: [ { $skip: 0 }, { $limit: 10 } ] // add projection here wish you re-shape the docs
+        }
+      },{
+        $project: {
+          data: {
+            $slice: ['$data', skip, {
+              $ifNull: [limit, '$total.createdAt']
+            }]
+          },
+        }
+      }
+    ]);
+    const data2 = await this.contactModel.aggregate(pipeline2).exec();
+    console.log("data: ", data2);
+
+      
+    const pipeline = (filter = {}, skip = 0, limit = 10, sort = {}) => [{
+      $match: {
+        ...filter,
+        active: true,
+      }
+    },
+    {
+      $sort: {
+        ...sort,
+        createdAt: -1,
+      }
+    },
+    {
+      $lookup: {
+        from: 'statistic',
+        localField: '_id',
+        foreignField: 'driverId',
+        as: 'driver',
+      },
+    },
+    {
+      $unwind: {
+        path: '$driver',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        driver: {
+          $ifNull: [{
+            $concat: ['$driver.firstName', ' ', '$driver.lastName']
+          }, 'Technical']
+        },
+        entityId: 1,
+        message: 1,
+        meta: 1,
+        createdAt: 1,
+      },
+    },
+    {
+      $facet: {
+        total: [{
+          $count: 'createdAt'
+        }],
+        data: [{
+          $addFields: {
+            _id: '$_id'
+          }
+        }],
+      },
+    },
+    {
+      $unwind: '$total'
+    },
+    {
+      $project: {
+        data: {
+          $slice: ['$data', skip, {
+            $ifNull: [limit, '$total.createdAt']
+          }]
+        },
+        meta: {
+          total: '$total.createdAt',
+          limit: {
+            $literal: limit
+          },
+          page: {
+            $literal: ((skip / limit) + 1)
+          },
+          pages: {
+            $ceil: {
+              $divide: ['$total.createdAt', limit]
+            }
+          },
+        },
+      },
+    },
+    ];
+    const executePipeline = async () => {
+      return this.contactModel.aggregate(pipeline());
+    };
+
+
+    // test
+    const resp = new Promise<AggregatePaginateResult<IContact>>((resolve, reject) => {
+      let ret: AggregatePaginateResult<IContact> = {
+        docs: /* [{
+          email: 'test@gmail.com',
+          phone: '555-1234',
+          name: 'Test User',
+        } as IContact] */
+        data2,
+        totalDocs: 1,
+        limit: 10,
+        totalPages: 1,
+        pagingCounter: 1,
+        hasPrevPage: false,
+        hasNextPage: false,          
+      };
+      resolve(ret);
+    });
+
+
+      
+    return resp;
   }
 
   async getById(id: string): Promise<IContact> {
