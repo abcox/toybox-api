@@ -67,7 +67,7 @@ export class ContactController {
   //@ApiResponse({ status: 200, description: 'Search contact list succeeded' })
   @ApiQuery({name: 'page', required: false, explode: false, type: Number, isArray: false})
   @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
-  @ApiQuery({name: 'searchString', required: false, explode: false, type: String, isArray: false})
+  @ApiQuery({name: 'search', required: false, explode: false, type: String, isArray: false})
   //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
   @Get('search')
   //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
@@ -77,6 +77,7 @@ export class ContactController {
     @MongoPaginationParamDecorator({ perPageName:"limit" }) pagination: MongoPagination
     ): //Promise<{items: IContact[], totalItems: number}>
       //Promise<{ items: AggregatePaginateResult<IContact>, totalItems: number}>
+      //Promise<{ docs: IContact[], meta: { limit: String, page: String } }>
       Promise<AggregatePaginateResult<IContact>>
     {
       //Logger.log(`search request: ${inspect(request)}`);
@@ -96,14 +97,28 @@ export class ContactController {
       //Logger.log(`search pagination: ${inspect(pagination)}`);
       //const data = await this.contactService.getAll2(query);
       //const data = this.contactService.getAll();
-      pagination.filter = query.searchString;
-      const resp = await this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
-      const count = await this.contactService.count();
-      Logger.log(`search pagination count: ${count}`);
+
+      pagination.filter = query.search;
+      const searchResult = await this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
+      Logger.log(`search result: `, JSON.stringify(searchResult));
+
+      //const count = await this.contactService.count();
+      //Logger.log(`search pagination count: ${count}`);
+
       //const resp = { totalItems: count, items: data };
       //Logger.log(`search pagination: ${inspect(data)}`);
       //Logger.log(`search resp: ${inspect(resp)}`);
-      return resp;
+
+      const response = new Promise<AggregatePaginateResult<IContact>>((resolve, reject) => {
+        try
+        {
+          resolve(searchResult);
+        } catch {
+          reject();
+        }
+      });
+
+      return response;
   }
 
   @ApiOperation({ summary: 'Get contact' })
