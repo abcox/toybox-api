@@ -68,6 +68,8 @@ export class ContactController {
   @ApiQuery({name: 'page', required: false, explode: false, type: Number, isArray: false})
   @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
   @ApiQuery({name: 'search', required: false, explode: false, type: String, isArray: false})
+  @ApiQuery({name: 'sortBy', required: false, explode: false, type: String, isArray: true})
+  @ApiQuery({name: 'sortDesc', required: false, explode: false, type: Boolean, isArray: true})
   //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
   @Get('search')
   //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
@@ -94,13 +96,30 @@ export class ContactController {
       Logger.log(`search request url: ${inspect(request.url)}`);
       Logger.log(`search request query: ${inspect(query)}`);
       Logger.log(`search request pagination: ${inspect(pagination)}`);
+      Logger.log(`search request sortBy: ${inspect(query.sortBy)}`);
+      Logger.log(`search request sortDesc: ${inspect(query.sortDesc)}`);
       //Logger.log(`search pagination: ${inspect(pagination)}`);
       //const data = await this.contactService.getAll2(query);
       //const data = this.contactService.getAll();
 
       pagination.filter = query.search;
+      
+      type SortValue = 'asc' | 'desc' | 'ascending' | 'descending' | 1 | -1;
+
+      let sort:{[key:string]:SortValue} =
+        query.sortBy === undefined || query.sortBy === '' ||
+        query.sortDesc === undefined || query.sortBy === '' ? undefined :
+        query.sortBy.split(',').reduce((sort:{[key:string]:SortValue}, field:SortValue, index:number) => {
+          const sortDesc = query.sortDesc.split(',')[index];
+          const sortValue = !!(parseInt(sortDesc) || sortDesc === "true") ? 1 : -1;
+          sort[field] = sortValue;
+          return sort;
+        }, {});        
+      //console.log('sort: ', sort);
+      pagination.sort = sort;
+
       const searchResult = await this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
-      Logger.log(`search result: `, JSON.stringify(searchResult));
+      //Logger.log(`search result: `, JSON.stringify(searchResult));
 
       //const count = await this.contactService.count();
       //Logger.log(`search pagination count: ${count}`);

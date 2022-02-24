@@ -225,7 +225,96 @@ export class ContactService {
 
     const filter2 = { input: "$name", as: "name", cond: { $eq: [ "Adam" ] } };
 
-    const pipeline = ([
+    let pipeline2 = [];
+
+    let match = {
+      '$match': {
+        $expr: {
+          $or: [
+            {
+              '$regexMatch': {
+                'input': '$name',
+                'regex': filter || '',
+                'options': 'i'
+              }
+            },
+            {
+              '$regexMatch': {
+                'input': '$email',
+                'regex': filter || '',
+                'options': 'i'
+              }
+            },
+            {
+              '$regexMatch': {
+                'input': '$phone',
+                'regex': filter || '',
+                'options': 'i'
+              }
+            }
+          ]
+        }
+      }
+    };    
+    pipeline2.push(match);
+
+    //console.log("sort: ", sort);
+    if (sort!==undefined) {
+      pipeline2.push({'$sort':sort});
+    }
+
+    let facet = {
+      '$facet': {
+        /* total: [{
+          $count: 'createdAt'
+        }], */
+        //metadata: [{ $count: "total" }, { $addFields: { page: NumberInt(3) } }],
+        docs: [
+          //{ $skip: 0 }, { $limit: 10 } // add projection here wish you re-shape the docs
+          {
+            $addFields: {
+              //_id: '$_id',
+              id: '$_id'
+            },
+          },
+          { $skip: skip }, { $limit: limit }
+        ],
+        meta: [ { $count: 'total' } ]
+      }
+    }
+    pipeline2.push(facet);
+
+    let project = {
+      $project: {
+        /* docs: {
+          $slice: ['$data', skip, {
+            $ifNull: [limit, '$total.createdAt']
+          }],
+        }, */
+        docs: 1, //{ $arrayElemAt: [ '$docs', 0 ] },
+        //name: 1,
+        meta: {
+          total: { $arrayElemAt: [ '$meta.total', 0 ] },
+          limit: {
+            $literal: limit
+          },
+          page: {
+            $literal: ((skip / limit) + 1)
+          },
+          /* pages: {
+            $ceil: {
+              $divide: ['$meta.total', limit]
+            }
+          }, */
+        }
+      }
+    };
+    pipeline2.push(project);
+    pipeline2.push({
+      $unwind: '$meta'
+    });
+
+    let pipeline = [
       //{ '$match' : { "_id" : new Types.ObjectId("6003b1b61af92c53c410936f") } },
       //{ '$match' : { ...filter2, active: true } },
       {
@@ -271,6 +360,9 @@ export class ContactService {
           preserveNullAndEmptyArrays: true,
         },
       }, */
+      {
+        $sort: { name: 1 }
+      },
       {
         '$facet': {
           /* total: [{
@@ -321,9 +413,11 @@ export class ContactService {
       {
         $unwind: '$meta'
       },
-    ]);
-    const results = [...await this.contactModel.aggregate<any>(pipeline)][0];
-    //console.log("data: ", docs);
+    ];
+
+    //pipeline.push({ $sort: { name: 1 } });
+    const results = [...await this.contactModel.aggregate<any>(pipeline2)][0];
+    console.log("results: ", results);
 
       
     /* const pipeline = (filter = {}, skip = 0, limit = 10, sort = {}) => [{
@@ -428,8 +522,6 @@ export class ContactService {
       };
       resolve(ret);
     });
-
-    console.log("results: ", results);
       
     return results;
   }
