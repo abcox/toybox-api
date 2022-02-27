@@ -19,7 +19,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "gen-backend": "openapi-generator-cli generate -i http://localhost:3000/api-json --generator-name typescript-axios -o ../toybox-backend --config openapi-config.json"
   },
   "dependencies": {
     "@algoan/nestjs-pagination": "^4.1.0",
@@ -28,6 +29,7 @@
     "@nestjs/mongoose": "^7.2.1",
     "@nestjs/platform-express": "^7.5.1",
     "@nestjs/swagger": "^4.7.8",
+    "@openapitools/openapi-generator-cli": "^2.4.26",
     "class-validator": "^0.12.2",
     "mongodb": "^3.6.3",
     "mongoose": "^5.11.11",

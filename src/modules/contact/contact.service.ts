@@ -1,4 +1,4 @@
-import { AggregatePaginateModel, AggregatePaginateResult, Connection, Model, Types } from 'mongoose';
+import { AggregatePaginateModel, AggregatePaginateResult, Connection, Model, Types, Mongoose } from 'mongoose';
 import { Injectable, Inject, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { IContact, ContactCreateResponse, ContactDeleteResponse, ContactSearchResponse } from './interfaces/contact.interface';
 import { ContactDto } from './dto/contact.dto';
@@ -128,7 +128,9 @@ export class ContactService {
   // https://stackoverflow.com/questions/48305624/how-to-use-mongodb-aggregation-for-pagination (facets)
   // https://doug-martin.github.io/nestjs-query/
 
-  async search(optionsIn: MongoPagination): Promise<AggregatePaginateResult<IContact>> {
+  async search(optionsIn: MongoPagination): Promise<any> {
+    
+    Logger.log('optionsIn: ', JSON.stringify(optionsIn));
     
     //const contactPagedModel2: ContactPagedModel<IContact & Document> = this.connection.model<IContact>('Contact', ContactSchema2) as ContactPagedModel<IContact & Document>;
     //const contactPagedModel2: any = this.connection.model('Contact', ContactSchema2);
@@ -214,7 +216,314 @@ export class ContactService {
       contactPagedModel2.aggregate(aggregateOptions),
       options
       ); */
-    return undefined;
+
+
+    // Review:
+    // https://mongoplayground.net/
+    // https://dev.to/max_vynohradov/the-right-way-to-make-advanced-and-efficient-mongodb-pagination-16oa
+    // https://stackoverflow.com/questions/59975487/how-do-i-filter-by-a-subdocument-substring-using-indexofcp
+
+    const filter2 = { input: "$name", as: "name", cond: { $eq: [ "Adam" ] } };
+
+    let pipeline2 = [];
+
+    let match = {
+      '$match': {
+        $expr: {
+          $or: [
+            {
+              '$regexMatch': {
+                'input': '$name',
+                'regex': filter || '',
+                'options': 'i'
+              }
+            },
+            {
+              '$regexMatch': {
+                'input': '$email',
+                'regex': filter || '',
+                'options': 'i'
+              }
+            },
+            {
+              '$regexMatch': {
+                'input': '$phone',
+                'regex': filter || '',
+                'options': 'i'
+              }
+            }
+          ]
+        }
+      }
+    };    
+    pipeline2.push(match);
+
+    //console.log("sort: ", sort);
+    if (sort!==undefined) {
+      pipeline2.push({'$sort':sort});
+    }
+
+    let facet = {
+      '$facet': {
+        /* total: [{
+          $count: 'createdAt'
+        }], */
+        //metadata: [{ $count: "total" }, { $addFields: { page: NumberInt(3) } }],
+        docs: [
+          //{ $skip: 0 }, { $limit: 10 } // add projection here wish you re-shape the docs
+          {
+            $addFields: {
+              //_id: '$_id',
+              id: '$_id'
+            },
+          },
+          { $skip: skip }, { $limit: limit }
+        ],
+        meta: [ { $count: 'total' } ]
+      }
+    }
+    pipeline2.push(facet);
+
+    let project = {
+      $project: {
+        /* docs: {
+          $slice: ['$data', skip, {
+            $ifNull: [limit, '$total.createdAt']
+          }],
+        }, */
+        docs: 1, //{ $arrayElemAt: [ '$docs', 0 ] },
+        //name: 1,
+        meta: {
+          total: { $arrayElemAt: [ '$meta.total', 0 ] },
+          limit: {
+            $literal: limit
+          },
+          page: {
+            $literal: ((skip / limit) + 1)
+          },
+          /* pages: {
+            $ceil: {
+              $divide: ['$meta.total', limit]
+            }
+          }, */
+        }
+      }
+    };
+    pipeline2.push(project);
+    pipeline2.push({
+      $unwind: '$meta'
+    });
+
+    let pipeline = [
+      //{ '$match' : { "_id" : new Types.ObjectId("6003b1b61af92c53c410936f") } },
+      //{ '$match' : { ...filter2, active: true } },
+      {
+        '$match': {
+          $expr: {
+            $or: [
+              {
+                '$regexMatch': {
+                  'input': '$name',
+                  'regex': filter || '',
+                  'options': 'i'
+                }
+              },
+              {
+                '$regexMatch': {
+                  'input': '$email',
+                  'regex': filter || '',
+                  'options': 'i'
+                }
+              },
+              {
+                '$regexMatch': {
+                  'input': '$phone',
+                  'regex': filter || '',
+                  'options': 'i'
+                }
+              }
+            ]
+          }
+        }
+      },/* 
+      {
+        $lookup: {
+          from: 'contacts',
+          localField: 'contactId',
+          foreignField: '_id',
+          as: 'contact',
+        },
+      }, */
+      /* {
+        $unwind: {
+          path: '$contact',
+          preserveNullAndEmptyArrays: true,
+        },
+      }, */
+      {
+        $sort: { name: 1 }
+      },
+      {
+        '$facet': {
+          /* total: [{
+            $count: 'createdAt'
+          }], */
+          //metadata: [{ $count: "total" }, { $addFields: { page: NumberInt(3) } }],
+          docs: [
+            //{ $skip: 0 }, { $limit: 10 } // add projection here wish you re-shape the docs
+            {
+              $addFields: {
+                //_id: '$_id',
+                id: '$_id'
+              },
+            },
+            { $skip: skip }, { $limit: limit }
+          ],
+          meta: [ { $count: 'total' } ]
+        }
+      },
+      /* {
+        $unwind: '$total'
+      }, */
+      {
+        $project: {
+          /* docs: {
+            $slice: ['$data', skip, {
+              $ifNull: [limit, '$total.createdAt']
+            }],
+          }, */
+          docs: 1, //{ $arrayElemAt: [ '$docs', 0 ] },
+          //name: 1,
+          meta: {
+            total: { $arrayElemAt: [ '$meta.total', 0 ] },
+            limit: {
+              $literal: limit
+            },
+            page: {
+              $literal: ((skip / limit) + 1)
+            },
+            /* pages: {
+              $ceil: {
+                $divide: ['$meta.total', limit]
+              }
+            }, */
+          }
+        }
+      },
+      {
+        $unwind: '$meta'
+      },
+    ];
+
+    //pipeline.push({ $sort: { name: 1 } });
+    const results = [...await this.contactModel.aggregate<any>(pipeline2)][0];
+    console.log("results: ", results);
+
+      
+    /* const pipeline = (filter = {}, skip = 0, limit = 10, sort = {}) => [{
+      $match: {
+        ...filter,
+        active: true,
+      }
+    },
+    {
+      $sort: {
+        ...sort,
+        createdAt: -1,
+      }
+    },
+    {
+      $lookup: {
+        from: 'statistic',
+        localField: '_id',
+        foreignField: 'driverId',
+        as: 'driver',
+      },
+    },
+    {
+      $unwind: {
+        path: '$driver',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        driver: {
+          $ifNull: [{
+            $concat: ['$driver.firstName', ' ', '$driver.lastName']
+          }, 'Technical']
+        },
+        entityId: 1,
+        message: 1,
+        meta: 1,
+        createdAt: 1,
+      },
+    },
+    {
+      $facet: {
+        total: [{
+          $count: 'createdAt'
+        }],
+        data: [{
+          $addFields: {
+            _id: '$_id'
+          }
+        }],
+      },
+    },
+    {
+      $unwind: '$total'
+    },
+    {
+      $project: {
+        data: {
+          $slice: ['$data', skip, {
+            $ifNull: [limit, '$total.createdAt']
+          }]
+        },
+        meta: {
+          total: '$total.createdAt',
+          limit: {
+            $literal: limit
+          },
+          page: {
+            $literal: ((skip / limit) + 1)
+          },
+          pages: {
+            $ceil: {
+              $divide: ['$total.createdAt', limit]
+            }
+          },
+        },
+      },
+    },
+    ];
+    const executePipeline = async () => {
+      return this.contactModel.aggregate(pipeline());
+    }; */
+
+    const testDocs = [{
+      email: 'test@gmail.com',
+      phone: '555-1234',
+      name: 'Test User',
+    } as IContact];
+
+    // test
+    const resp = new Promise<AggregatePaginateResult<IContact>>((resolve, reject) => {
+      let ret: AggregatePaginateResult<IContact> = {
+        docs: results,
+        totalDocs: 1,
+        limit: 10,
+        totalPages: 1,
+        pagingCounter: 1,
+        hasPrevPage: false,
+        hasNextPage: false,
+        //...results
+      };
+      resolve(ret);
+    });
+      
+    return results;
   }
 
   async getById(id: string): Promise<IContact> {

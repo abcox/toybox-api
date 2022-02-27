@@ -63,15 +63,25 @@ export class ContactController {
   // https://slingshotlabs.io/blog/cursor-pagination-graphql-mongodb/
 
   //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
-  @ApiOperation({ summary: 'Get contact list' }) // todo: Search contacts
+  @ApiOperation({ summary: 'Search contact list' }) // todo: Search contacts
+  //@ApiResponse({ status: 200, description: 'Search contact list succeeded' })
+  @ApiQuery({name: 'page', required: false, explode: false, type: Number, isArray: false})
   @ApiQuery({name: 'limit', required: false, explode: false, type: Number, isArray: false})
+  @ApiQuery({name: 'search', required: false, explode: false, type: String, isArray: false})
+  @ApiQuery({name: 'sortBy', required: false, explode: false, type: String, isArray: true})
+  @ApiQuery({name: 'sortDesc', required: false, explode: false, type: Boolean, isArray: true})
+  //@UseInterceptors(new LinkHeaderInterceptor({ resource: 'search' }))
   @Get('search')
   //searchContacts(@Param('options') options: any): Promise<AggregatePaginateResult<IContact>> {
   async searchContacts(
     @Request() request: Request,
     @Query() query,
-    //@MongoPaginationParamDecorator() pagination: MongoPagination
-    ): Promise<{items: IContact[], totalItems: number}> {// Promise<AggregatePaginateResult<IContact>>
+    @MongoPaginationParamDecorator({ perPageName:"limit" }) pagination: MongoPagination
+    ): //Promise<{items: IContact[], totalItems: number}>
+      //Promise<{ items: AggregatePaginateResult<IContact>, totalItems: number}>
+      //Promise<{ docs: IContact[], meta: { limit: String, page: String } }>
+      Promise<AggregatePaginateResult<IContact>>
+    {
       //Logger.log(`search request: ${inspect(request)}`);
            
       /* const dir = await fs.promises.opendir("../logs");
@@ -82,27 +92,60 @@ export class ContactController {
         if (err) throw err;
         console.log('The file has been saved!');
       }); */
-
+      
       Logger.log(`search request url: ${inspect(request.url)}`);
       Logger.log(`search request query: ${inspect(query)}`);
+      Logger.log(`search request pagination: ${inspect(pagination)}`);
+      Logger.log(`search request sortBy: ${inspect(query.sortBy)}`);
+      Logger.log(`search request sortDesc: ${inspect(query.sortDesc)}`);
       //Logger.log(`search pagination: ${inspect(pagination)}`);
-      const data = await this.contactService.getAll2(query);
+      //const data = await this.contactService.getAll2(query);
       //const data = this.contactService.getAll();
-      //return this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
-      const count = await this.contactService.count();
-      Logger.log(`search pagination count: ${count}`);
-      const resp = { totalItems: count, items: data };
+
+      pagination.filter = query.search;
+      
+      type SortValue = 'asc' | 'desc' | 'ascending' | 'descending' | 1 | -1;
+
+      let sort:{[key:string]:SortValue} =
+        query.sortBy === undefined || query.sortBy === '' ||
+        query.sortDesc === undefined || query.sortBy === '' ? undefined :
+        query.sortBy.split(',').reduce((sort:{[key:string]:SortValue}, field:SortValue, index:number) => {
+          const sortDesc = query.sortDesc.split(',')[index];
+          const sortValue = !!(parseInt(sortDesc) || sortDesc === "true") ? 1 : -1;
+          sort[field] = sortValue;
+          return sort;
+        }, {});        
+      //console.log('sort: ', sort);
+      pagination.sort = sort;
+
+      const searchResult = await this.contactService.search(pagination);  // TODO: finish impl. aggreg. & paginated..
+      //Logger.log(`search result: `, JSON.stringify(searchResult));
+
+      //const count = await this.contactService.count();
+      //Logger.log(`search pagination count: ${count}`);
+
+      //const resp = { totalItems: count, items: data };
       //Logger.log(`search pagination: ${inspect(data)}`);
       //Logger.log(`search resp: ${inspect(resp)}`);
-      return resp;
+
+      const response = new Promise<AggregatePaginateResult<IContact>>((resolve, reject) => {
+        try
+        {
+          resolve(searchResult);
+        } catch {
+          reject();
+        }
+      });
+
+      return response;
   }
 
-  @ApiOperation({ operationId: "getContact", summary: 'Get contact' })
-/*   @ApiResponse({
-      description: 'Contact',
-      status: 201,
-      //type: Contact // todo: resolve
-    }) */
+  @ApiOperation({ summary: 'Get contact' })
+  @ApiResponse({
+    description: 'Contact',
+    status: 201,
+    //type: Contact // todo: resolve
+  })
   @Get(':id')
   getContact(@Param('id') id: string): Promise<IContact> {
     const item = this.contactService.getById(id);
@@ -115,11 +158,11 @@ export class ContactController {
   @Post()
   @ApiOperation({operationId: "createContact",  summary: 'Create contact' })
   @ApiCreatedResponse({
-      description: 'Contact created',
-      status: 201,
-      //type: Contact // todo: resolve
-    })
-  /* @ApiResponse({ status: 403, description: 'Forbidden.' }) */
+    description: 'Contact created',
+    status: 201,
+    //type: Contact // todo: resolve
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
   public async createContact(@Response() res, @Body() contact: ContactDto) {
     Logger.log("creating contact: ", JSON.stringify(contact));    
     const result = await this.contactService.create(contact);
@@ -150,8 +193,11 @@ export class ContactController {
     return res.status(HttpStatus.OK).json(result);
   }
 
-  @ApiOperation({ operationId: "deleteContact", summary: 'Delete contact' })
-  /* @ApiResponse({ description: 'Contact deleted' }) */
+  @ApiOperation({ summary: 'Delete contact' })
+  @ApiResponse({
+    description: 'Contact deleted',
+    status: 200
+  })
   //@ApiQuery({ name: 'id', type: 'string' })
   @Delete(':id')
   public async deleteContact(@Param('id') id: string, @Response() res) {
@@ -161,7 +207,11 @@ export class ContactController {
   
   @ApiOperation({ operationId: "updateContact", summary: 'Update contact' })
   @Patch(':id')
-  public async updateContact2(@Param('id') id: string, @Response() res, @Body() contact: ContactDto) {
+  public async updateContact(
+    @Param('id') id: string,
+    @Response() res,
+    @Body() contact: ContactDto
+    ) {
       const result = await this.contactService.update(id, contact);
       return res.status(HttpStatus.OK).json(result);
   }
