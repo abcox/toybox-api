@@ -105,10 +105,10 @@ export class ContactController {
       pagination.filter = query.search;
       
       type SortValue = 'asc' | 'desc' | 'ascending' | 'descending' | 1 | -1;
-
+      
       let sort:{[key:string]:SortValue} =
         query.sortBy === undefined || query.sortBy === '' ||
-        query.sortDesc === undefined || query.sortBy === '' ? undefined :
+        query.sortDesc === undefined || query.sortDesc === '' ? undefined :
         query.sortBy.split(',').reduce((sort:{[key:string]:SortValue}, field:SortValue, index:number) => {
           const sortDesc = query.sortDesc.split(',')[index];
           const sortValue = !!(parseInt(sortDesc) || sortDesc === "true") ? 1 : -1;
