@@ -184,12 +184,14 @@ export class ContactController {
   @Post("delete/list")
   @ApiOperation({ summary: 'Delete contacts' })
   @ApiBody({ type: [String] })
-  public async deleteContacts(@Response() res, @Body() contactIdList: [string]) {
-    let result = new Array<string>();
+  public async deleteContacts(@Response() res, @Body() contactIdList: [String]) {
+    console.log('contactIdList: ', contactIdList);
+    let result = new Array<String>();
     for (const id of contactIdList) {
       const response = await this.contactService.delete(id);
       result.push(response.id);
     }
+    console.log('result: ', result);
     return res.status(HttpStatus.OK).json(result);
   }
 

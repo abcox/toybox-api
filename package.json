@@ -20,7 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "gen-backend": "openapi-generator-cli generate -i http://localhost:3000/api-json --generator-name typescript-axios -o ../toybox-backend --config openapi-config.json"
+    "gen-backend": "openapi-generator-cli generate -i http://localhost:3000/api-json --generator-name typescript-axios -o ../toybox-backend-ts-axios --config openapi-config.json"
   },
   "dependencies": {
     "@algoan/nestjs-pagination": "^4.1.0",

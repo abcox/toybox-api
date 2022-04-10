@@ -54,7 +54,7 @@ export class ContactService {
     return result;
   }
 
-  async delete(id: string): Promise<ContactDeleteResponse> {
+  async delete(id: String): Promise<ContactDeleteResponse> {
     let result: ContactDeleteResponse;
     /* if (!Types.ObjectId.isValid(id)) {
       throw new InternalServerErrorException(`Invalid id ${id}`);   // todo: look into validation via middle-ware
@@ -417,7 +417,7 @@ export class ContactService {
 
     //pipeline.push({ $sort: { name: 1 } });
     const results = [...await this.contactModel.aggregate<any>(pipeline2)][0];
-    console.log("results: ", results);
+    //console.log("results: ", results);
 
       
     /* const pipeline = (filter = {}, skip = 0, limit = 10, sort = {}) => [{

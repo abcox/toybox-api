@@ -54,20 +54,20 @@ $ npm install
     ```bash
       # Review client openapitools configuration
       > toybox-api\openapi-config.json
-      > toybox-api\package.json > scripts/gen-cli
+      > toybox-api\package.json > scripts/gen-backend
 
       # Generate client
       > cd toybox-api
-      > npm run gen-cli
+      > npm run gen-backend
 
       # Build client
-      > cd ..\toybox-backend
+      > cd ..\toybox-backend-ts-axios
       > npm install
       > npm run build
 
       # Install
       > cd ..\toybox-web
-      > npm install ..\toybox-backend --save
+      > npm install ..\toybox-backend-ts-axios --save
 
     ```
 
@@ -75,7 +75,7 @@ $ npm install
 
     ```bash
 
-      "toybox-backend": "file:../toybox-backend"
+      "toybox-backend": "file:../toybox-backend-ts-axios"
 
     ```
 
