@@ -4,7 +4,7 @@
     <tr>
         <td vlign="center"><a href="https://github.com/jaredhanson/passport/" target="blank"><img src="https://bestofjs.org/logos/passport.svg" width="65" alt="Passport Logo" /></a></td>
         <td vlign="center"><a href="http://https://www.openapis.org/" target="blank"><img src="https://static.cdnlogo.com/logos/o/27/openapi.svg" width="105" alt="Open API Initiative (OAI) Logo" /></a></td>
-        <td vlign="center"><a href="http://nestjs.com/" target="blank"><img src="https://seeklogo.com/images/N/nestjs-logo-09342F76C0-seeklogo.com.png" width="65" alt="Nest Logo" /></a></td>
+        <td vlign="center"><a href="http://nestjs.com/" target="blank"><img src="https://static.cdnlogo.com/logos/n/57/nestjs.svg" width="65" alt="Nest Logo" /></a></td>
         <td vlign="center"><a href="http://mongodb.com/" target="blank"><img src="https://github.com/mongodb-js/leaf/blob/master/dist/mongodb-leaf_256x256.png?raw=true" width="70" alt="MongoDB Logo" /></a></td>
     </tr>
 </table>
