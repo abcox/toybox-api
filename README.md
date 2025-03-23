@@ -1,10 +1,9 @@
-
 <h1 align="center">Toybox API / Fullstack Typescript Demo</h1>
 
 <table style="margin-left:auto;margin-right:auto">
     <tr>
         <td vlign="center"><a href="https://github.com/jaredhanson/passport/" target="blank"><img src="https://bestofjs.org/logos/passport.svg" width="65" alt="Passport Logo" /></a></td>
-        <td vlign="center"><a href="http://https://www.openapis.org/" target="blank"><img src="https://community.cdn.kony.com/sites/default/files/icon-open-api-swagger.png" width="105" alt="Open API Initiative (OAI) Logo" /></a></td>
+        <td vlign="center"><a href="http://https://www.openapis.org/" target="blank"><img src="https://static.cdnlogo.com/logos/o/27/openapi.svg" width="105" alt="Open API Initiative (OAI) Logo" /></a></td>
         <td vlign="center"><a href="http://nestjs.com/" target="blank"><img src="https://seeklogo.com/images/N/nestjs-logo-09342F76C0-seeklogo.com.png" width="65" alt="Nest Logo" /></a></td>
         <td vlign="center"><a href="http://mongodb.com/" target="blank"><img src="https://github.com/mongodb-js/leaf/blob/master/dist/mongodb-leaf_256x256.png?raw=true" width="70" alt="MongoDB Logo" /></a></td>
     </tr>
@@ -31,9 +30,10 @@
 
 ## Description
 
-Toybox API uses the [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.  See [toybox-web](http://github.com/abcox/toybox-web) for web client using [vuetify](http://vuetifyjs.com).
+Toybox API uses the [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository. See [toybox-web](http://github.com/abcox/toybox-web) for web client using [vuetify](http://vuetifyjs.com), or the [angular client](http://github.com/abcox/toybox-web-ng)
 
 ## Prerequisites
+
 - [mongodb](https://docs.mongodb.com/guides/server/install/)
 - [Nest/NestJS](https://docs.nestjs.com/)
   - [OpenAPI for NestJS (swagger)](https://docs.nestjs.com/openapi/introduction)
@@ -41,6 +41,7 @@ Toybox API uses the [Nest](https://github.com/nestjs/nest) framework TypeScript 
   ```bash
   npm install @openapitools/openapi-generator-cli
   ```
+
 ## Installation
 
 ```bash
@@ -51,33 +52,33 @@ $ npm install
 
 1. Run commands:
 
-    ```bash
-      # Review client openapitools configuration
-      > toybox-api\openapi-config.json
-      > toybox-api\package.json > scripts/gen-backend
+   ```bash
+     # Review client openapitools configuration
+     > toybox-api\openapi-config.json
+     > toybox-api\package.json > scripts/gen-backend
 
-      # Generate client
-      > cd toybox-api
-      > npm run gen-backend
+     # Generate client
+     > cd toybox-api
+     > npm run gen-backend
 
-      # Build client
-      > cd ..\toybox-backend-ts-axios
-      > npm install
-      > npm run build
+     # Build client
+     > cd ..\toybox-backend-ts-axios
+     > npm install
+     > npm run build
 
-      # Install
-      > cd ..\toybox-web
-      > npm install ..\toybox-backend-ts-axios --save
+     # Install
+     > cd ..\toybox-web
+     > npm install ..\toybox-backend-ts-axios --save
 
-    ```
+   ```
 
 2. Review package.json for client reference
 
-    ```bash
+   ```bash
 
-      "toybox-backend": "file:../toybox-backend-ts-axios"
+     "toybox-backend": "file:../toybox-backend-ts-axios"
 
-    ```
+   ```
 
 ## Running the app
 
@@ -96,12 +97,16 @@ $ npm run start:prod
 ```
 
 ## API Client Generation
+
 Delete folder 'api/cient' and all contents
 Generate the api/client
+
 ```
 npm run gencli
 ```
+
 Add file .eslintignore, and add:
+
 ```
 /*.*
 ```
@@ -135,7 +140,8 @@ None
 None
 
 ## Support
+
 1. Issue during build of API results in no changes: [SO](nestjs SwaggerDocumentOptions github)
-    ```
-    npm run prebuild
-    ```
+   ```
+   npm run prebuild
+   ```
